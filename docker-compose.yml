@@ -1,17 +1,126 @@
-version: '3.8'
+version: "3.8"
 
 services:
-  postgres:
+  # PostgreSQL Development
+  postgres-dev:
     image: postgres:15
-    container_name: ${POSTGRES_CONTAINER_NAME}
+    container_name: ${POSTGRES_DEV_CONTAINER_NAME:-postgres-dev}
     restart: always
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_DEV_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_DEV_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DEV_DB:-testdb}
     ports:
-      - "${POSTGRES_PORT}:5432"
+      - "${POSTGRES_DEV_PORT:-5432}:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata_dev:/var/lib/postgresql/data
+    profiles:
+      - postgres
+      - postgres-dev
+      - dev
+      - all
+
+  # PostgreSQL Production
+  postgres-prod:
+    image: postgres:15
+    container_name: ${POSTGRES_PROD_CONTAINER_NAME:-postgres-prod}
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_PROD_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PROD_PASSWORD:-securepassword}
+      POSTGRES_DB: ${POSTGRES_PROD_DB:-proddb}
+    ports:
+      - "${POSTGRES_PROD_PORT:-5433}:5432"
+    volumes:
+      - pgdata_prod:/var/lib/postgresql/data
+    profiles:
+      - postgres
+      - postgres-prod
+      - prod
+      - all
+
+  # MySQL Development
+  mysql-dev:
+    image: mysql:8.0
+    container_name: ${MYSQL_DEV_CONTAINER_NAME:-mysql-dev}
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_DEV_ROOT_PASSWORD:-password}
+      MYSQL_DATABASE: ${MYSQL_DEV_DB:-testdb}
+      MYSQL_USER: ${MYSQL_DEV_USER:-mysql}
+      MYSQL_PASSWORD: ${MYSQL_DEV_PASSWORD:-password}
+    ports:
+      - "${MYSQL_DEV_PORT:-3306}:3306"
+    volumes:
+      - mysql_dev:/var/lib/mysql
+    profiles:
+      - mysql
+      - mysql-dev
+      - dev
+      - all
+
+  # MySQL Production
+  mysql-prod:
+    image: mysql:8.0
+    container_name: ${MYSQL_PROD_CONTAINER_NAME:-mysql-prod}
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PROD_ROOT_PASSWORD:-securepassword}
+      MYSQL_DATABASE: ${MYSQL_PROD_DB:-proddb}
+      MYSQL_USER: ${MYSQL_PROD_USER:-mysql}
+      MYSQL_PASSWORD: ${MYSQL_PROD_PASSWORD:-securepassword}
+    ports:
+      - "${MYSQL_PROD_PORT:-3307}:3306"
+    volumes:
+      - mysql_prod:/var/lib/mysql
+    profiles:
+      - mysql
+      - mysql-prod
+      - prod
+      - all
+
+  # SQL Server Development
+  sqlserver-dev:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: ${SQLSERVER_DEV_CONTAINER_NAME:-sqlserver-dev}
+    restart: always
+    environment:
+      SA_PASSWORD: ${SQLSERVER_DEV_PASSWORD:-Password123!}
+      ACCEPT_EULA: Y
+      MSSQL_PID: Developer
+    ports:
+      - "${SQLSERVER_DEV_PORT:-1433}:1433"
+    volumes:
+      - sqlserver_dev:/var/opt/mssql
+    profiles:
+      - sqlserver
+      - sqlserver-dev
+      - dev
+      - all
+
+  # SQL Server Production
+  sqlserver-prod:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: ${SQLSERVER_PROD_CONTAINER_NAME:-sqlserver-prod}
+    restart: always
+    environment:
+      SA_PASSWORD: ${SQLSERVER_PROD_PASSWORD:-SecurePassword123!}
+      ACCEPT_EULA: Y
+      MSSQL_PID: Standard
+    ports:
+      - "${SQLSERVER_PROD_PORT:-1434}:1433"
+    volumes:
+      - sqlserver_prod:/var/opt/mssql
+    profiles:
+      - sqlserver
+      - sqlserver-prod
+      - prod
+      - all
 
 volumes:
-  pgdata:
+  pgdata_dev:
+  pgdata_prod:
+  mysql_dev:
+  mysql_prod:
+  sqlserver_dev:
+  sqlserver_prod:
